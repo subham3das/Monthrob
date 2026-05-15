@@ -261,9 +261,8 @@
         btn.disabled = true;
 
         try {
-          const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:5000/api'
-            : '/api';
+          const apiBase = 'https://monbackend.vercel.app/api';
+          console.log('Attempting login to:', apiBase + '/auth/login');
 
           const res = await fetch(`${apiBase}/auth/login`, {
             method: 'POST',
@@ -291,9 +290,7 @@
       function handleCredentialResponse(response) {
         console.log("Encoded JWT ID token: " + response.credential);
         
-        const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:5000/api'
-          : '/api';
+        const apiBase = 'https://monbackend.vercel.app/api';
 
         fetch(`${apiBase}/auth/google`, {
           method: 'POST',
