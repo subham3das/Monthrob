@@ -350,6 +350,11 @@
 
     <script src="../backend/api/mock-db.js"></script>
     <script>
+      // Authentication Guard
+      if (!localStorage.getItem('monthrob_token')) {
+        window.location.href = './login.html';
+      }
+
       let currentAddresses = [];
 
       document.addEventListener("DOMContentLoaded", () => {
