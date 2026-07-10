@@ -40,6 +40,11 @@ export default function AdminLogin({ onLoginSuccess }) {
       setError("");
       try {
         const res = await googleLoginUser(tokenResponse.access_token);
+        if (res.data.role !== "admin") {
+          setError("Access denied. Admin credentials required.");
+          setLoading(false);
+          return;
+        }
         onLoginSuccess(res.data);
       } catch (err) {
         setError(err.response?.data?.message || "Google login failed");
