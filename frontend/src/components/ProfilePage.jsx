@@ -883,17 +883,23 @@ export default function ProfilePage({
               <>
                 <div className="order-header-row">
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div className="recent-order-img-container">
-                      <img
-                        src={ongoingOrder.items?.[0]?.product?.images?.[0] || ""}
-                        alt={ongoingOrder.items?.[0]?.product?.name || ongoingOrder.items?.[0]?.name || "streetwear bundle"}
-                      />
-                    </div>
+                    {ongoingOrder.items?.[0]?.product === null ? (
+                      <div style={{ padding: '12px', borderRadius: '12px', background: '#F4F4F5' }}>
+                        <span style={{ fontSize: '12px', fontStyle: 'italic', color: '#A1A1AA' }}>Removed</span>
+                      </div>
+                    ) : (
+                      <div className="recent-order-img-container">
+                        <img
+                          src={ongoingOrder.items?.[0]?.product?.images?.[0] || ""}
+                          alt={ongoingOrder.items?.[0]?.product?.name || ongoingOrder.items?.[0]?.name || "streetwear bundle"}
+                        />
+                      </div>
+                    )}
                     <div>
                       <span className="order-id-label">#{ongoingOrder.shortId || ongoingOrder._id?.slice(-6).toUpperCase()}</span>
                       <h4 className="order-product-name">
-                        {ongoingOrder.items?.[0]?.product?.name || ongoingOrder.items?.[0]?.name || "streetwear bundle"}
-                        {ongoingOrder.items?.length > 1 && ` + ${ongoingOrder.items.length - 1} items`}
+                        {ongoingOrder.items?.[0]?.product === null ? "Product has been removed" : (ongoingOrder.items?.[0]?.product?.name || ongoingOrder.items?.[0]?.name || "streetwear bundle")}
+                        {!ongoingOrder.items?.[0]?.product === null && ongoingOrder.items?.length > 1 && ` + ${ongoingOrder.items.length - 1} items`}
                       </h4>
                     </div>
                   </div>
@@ -1017,16 +1023,23 @@ export default function ProfilePage({
                 setTrackingOrder(pastOrder);
                 setProfileView("tracking");
               }}
+              style={pastOrder.items?.[0]?.product === null ? { opacity: 0.4, filter: 'grayscale(1)' } : {}}
             >
               <div className="recent-order-left">
-                <div className="recent-order-img-container">
-                  <img
-                    src={pastOrder.items?.[0]?.product?.images?.[0] || pastOrder.items?.[0]?.image || ""}
-                    alt={pastOrder.items?.[0]?.product?.name || pastOrder.items?.[0]?.name}
-                  />
-                </div>
+                {pastOrder.items?.[0]?.product === null ? (
+                  <div style={{ padding: '12px', borderRadius: '12px', background: '#F4F4F5' }}>
+                    <span style={{ fontSize: '12px', fontStyle: 'italic', color: '#A1A1AA' }}>Removed</span>
+                  </div>
+                ) : (
+                  <div className="recent-order-img-container">
+                    <img
+                      src={pastOrder.items?.[0]?.product?.images?.[0] || ""}
+                      alt={pastOrder.items?.[0]?.product?.name || pastOrder.items?.[0]?.name}
+                    />
+                  </div>
+                )}
                 <div>
-                  <h4 className="recent-order-title">{pastOrder.items?.[0]?.product?.name || pastOrder.items?.[0]?.name || "streetwear item"}</h4>
+                  <h4 className="recent-order-title">{pastOrder.items?.[0]?.product === null ? "Product has been removed" : (pastOrder.items?.[0]?.product?.name || pastOrder.items?.[0]?.name || "streetwear item")}</h4>
                   <p className="recent-order-status-info">
                     Status: {pastOrder.status} · Rs. {pastOrder.totalAmount || pastOrder.total}
                   </p>
@@ -1134,13 +1147,19 @@ export default function ProfilePage({
 
                   <div className="order-hist-items">
                     {order.items?.map((item, idx) => (
-                      <div key={idx} className="order-hist-item-row">
-                        <img
-                          className="order-hist-item-img"
-                          src={item.product?.images?.[0] || ""}
-                          alt={item.product?.name || item.name}
-                        />
-                        <span className="order-hist-item-name">{item.product?.name || item.name}</span>
+                      <div key={idx} className="order-hist-item-row" style={item.product === null ? { opacity: 0.4, filter: 'grayscale(1)' } : {}}>
+                        {item.product === null ? (
+                          <span className="order-hist-item-name" style={{ fontStyle: 'italic', color: '#A1A1AA' }}>Product has been removed</span>
+                        ) : (
+                          <>
+                            <img
+                              className="order-hist-item-img"
+                              src={item.product?.images?.[0] || ""}
+                              alt={item.product?.name || item.name}
+                            />
+                            <span className="order-hist-item-name">{item.product?.name || item.name}</span>
+                          </>
+                        )}
                         <span className="order-hist-item-qty">x{item.quantity}</span>
                       </div>
                     ))}
@@ -1295,17 +1314,28 @@ export default function ProfilePage({
           </div>
           <div className="order-list-container">
             {trackingOrder.items?.map((item, idx) => (
-              <div key={idx} className="recent-order-box" style={{ cursor: "default" }}>
+              <div key={idx} className="recent-order-box" style={{ cursor: "default", ...(item.product === null ? { opacity: 0.4, filter: 'grayscale(1)' } : {}) }}>
                 <div className="recent-order-left">
-                  <div className="recent-order-img-container">
-                    <img src={item.product?.images?.[0] || item.image || ""} alt={item.product?.name || item.name} />
-                  </div>
-                  <div>
-                    <h4 className="recent-order-title">{item.product?.name || item.name}</h4>
-                    <p className="recent-order-status-info">
-                      Rs. {item.priceAtTime || item.price} · Qty: {item.quantity}
-                    </p>
-                  </div>
+                  {item.product === null ? (
+                    <div>
+                      <h4 className="recent-order-title" style={{ fontStyle: 'italic', color: '#A1A1AA' }}>Product has been removed</h4>
+                      <p className="recent-order-status-info">
+                        Rs. {item.priceAtTime || item.price} · Qty: {item.quantity}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="recent-order-img-container">
+                        <img src={item.product?.images?.[0] || ""} alt={item.product?.name || item.name} />
+                      </div>
+                      <div>
+                        <h4 className="recent-order-title">{item.product?.name || item.name}</h4>
+                        <p className="recent-order-status-info">
+                          Rs. {item.priceAtTime || item.price} · Qty: {item.quantity}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <span className="order-hist-price">Rs. {(item.priceAtTime || item.price) * item.quantity}</span>
               </div>
