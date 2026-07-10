@@ -1502,25 +1502,32 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                 <tbody>
                   {admins.map(admin => (
                     <tr key={admin._id}>
-                      <td>{admin.email}</td>
+                      <td>
+                        {admin.email}
+                        {admin.isSuperAdmin && <span style={{ marginLeft: '8px', padding: '2px 8px', background: '#0F0F0F', color: '#fff', borderRadius: '99px', fontSize: '10px', fontWeight: 800 }}>SUPER</span>}
+                      </td>
                       <td>{admin.name || '-'}</td>
                       <td>
-                        <button
-                          className="btn-action"
-                          style={{ background: '#EF4444', padding: '6px 12px' }}
-                          onClick={async () => {
-                            if (window.confirm(`Remove ${admin.email} from admin access?`)) {
-                              try {
-                                await removeAdmin(admin._id);
-                                setAdmins(admins.filter(a => a._id !== admin._id));
-                              } catch (err) {
-                                alert(err.response?.data?.message || "Failed to remove");
+                        {admin.isSuperAdmin ? (
+                          <span style={{ fontSize: '12px', color: '#A1A1AA' }}>Protected</span>
+                        ) : (
+                          <button
+                            className="btn-action"
+                            style={{ background: '#EF4444', padding: '6px 12px' }}
+                            onClick={async () => {
+                              if (window.confirm(`Remove ${admin.email} from admin access?`)) {
+                                try {
+                                  await removeAdmin(admin._id);
+                                  setAdmins(admins.filter(a => a._id !== admin._id));
+                                } catch (err) {
+                                  alert(err.response?.data?.message || "Failed to remove");
+                                }
                               }
-                            }
-                          }}
-                        >
-                          <Trash size={16} weight="bold" />
-                        </button>
+                            }}
+                          >
+                            <Trash size={16} weight="bold" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -46,7 +46,7 @@ router.post('/google-login', async (req, res) => {
       return res.status(500).json({ message: 'JWT_SECRET not configured on server' });
     }
     const token = jwt.sign(
-      { id: admin._id, role: 'admin', email: admin.email },
+      { id: admin._id, role: 'admin', email: admin.email, isSuperAdmin: admin.isSuperAdmin || false },
       secret,
       { expiresIn: '30d' }
     );
@@ -56,6 +56,7 @@ router.post('/google-login', async (req, res) => {
       name: admin.name || payload.name,
       email: admin.email,
       role: 'admin',
+      isSuperAdmin: admin.isSuperAdmin || false,
       token
     });
   } catch (error) {
@@ -90,8 +91,10 @@ router.post('/', protect, adminOnly, async (req, res) => {
 
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
-    const admin = await Admin.findByIdAndDelete(req.params.id);
-    if (!admin) return res.status(404).json({ message: 'Admin not found' });
+    const target = await Admin.findById(req.params.id);
+    if (!target) return res.status(404).json({ message: 'Admin not found' });
+    if (target.isSuperAdmin) return res.status(403).json({ message: 'Cannot remove super admin' });
+    await Admin.findByIdAndDelete(req.params.id);
     res.json({ message: 'Admin removed' });
   } catch (error) {
     res.status(400).json({ message: error.message });

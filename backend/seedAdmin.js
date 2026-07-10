@@ -11,7 +11,8 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const adminSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String },
-  googleId: { type: String }
+  googleId: { type: String },
+  isSuperAdmin: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const Admin = mongoose.model('Admin', adminSchema);
@@ -23,10 +24,10 @@ async function seed() {
 
     await Admin.findOneAndUpdate(
       { email: 'contactmonthrob@gmail.com' },
-      { email: 'contactmonthrob@gmail.com', name: 'Monthrob Admin' },
+      { email: 'contactmonthrob@gmail.com', name: 'Monthrob Admin', isSuperAdmin: true },
       { upsert: true, new: true }
     );
-    console.log('Admin user seeded: contactmonthrob@gmail.com');
+    console.log('Super admin seeded: contactmonthrob@gmail.com');
 
     const count = await Admin.countDocuments();
     console.log(`Total admins: ${count}`);
