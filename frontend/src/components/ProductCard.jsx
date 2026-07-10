@@ -1,7 +1,63 @@
-import React from "react";
-import { ShoppingBag } from "@phosphor-icons/react";
+import React, { useState, useRef, useEffect } from "react";
+import { ShoppingBag, X, Check } from "@phosphor-icons/react";
 
 export default function ProductCard({ product, onAddToCart, onProductClick, style }) {
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
+  const popupRef = useRef(null);
+
+  const hasSizes = product.sizes && product.sizes.length > 0;
+  const hasColors = product.colors && product.colors.length > 0;
+  const needsSelection = hasSizes || hasColors;
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        setShowPopup(false);
+      }
+    };
+    if (showPopup) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showPopup]);
+
+  const handleAddClick = (e) => {
+    e.stopPropagation();
+    if (!needsSelection) {
+      onAddToCart(product);
+      return;
+    }
+    setSelectedSize(null);
+    setSelectedColor(null);
+    setShowPopup(true);
+  };
+
+  const handleColorSelect = (color) => {
+    setSelectedColor(color);
+    if (!hasSizes) {
+      onAddToCart({ ...product, selectedColor: color, selectedSize: null });
+      setShowPopup(false);
+    }
+  };
+
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size);
+    if (!hasColors) {
+      onAddToCart({ ...product, selectedColor: null, selectedSize: size });
+      setShowPopup(false);
+    } else if (selectedColor) {
+      onAddToCart({ ...product, selectedColor, selectedSize: size });
+      setShowPopup(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSize !== null && selectedColor !== null && showPopup) {
+      onAddToCart({ ...product, selectedColor, selectedSize });
+      setShowPopup(false);
+    }
+  }, [selectedSize, selectedColor]);
+
   return (
     <div
       className="product-card"
@@ -43,14 +99,71 @@ export default function ProductCard({ product, onAddToCart, onProductClick, styl
           align-items: center;
           justify-content: center;
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-          z-index: 10;
+          z-index: 20;
           color: #000000;
           transition: var(--transition-fast);
+          cursor: pointer;
         }
         .quick-add-circle:hover {
           transform: scale(1.06);
           background: #000000;
           color: #ffffff;
+        }
+        .size-popup {
+          position: absolute;
+          top: 52px;
+          right: 4px;
+          z-index: 30;
+          background: #ffffff;
+          border-radius: 12px;
+          padding: 10px 12px;
+          box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+          min-width: 140px;
+          max-width: 180px;
+        }
+        .size-popup-title {
+          font-size: 10px;
+          font-weight: 700;
+          color: #71717A;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 6px;
+        }
+        .size-popup-options {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .size-popup-btn {
+          padding: 4px 10px;
+          font-size: 11px;
+          font-weight: 600;
+          border: 1.5px solid #E4E4E7;
+          border-radius: 6px;
+          background: #fff;
+          cursor: pointer;
+          color: #1A1A1A;
+          transition: all 0.15s;
+        }
+        .size-popup-btn:hover { border-color: #1A1A1A; }
+        .size-popup-btn.selected { background: #1A1A1A; color: #fff; border-color: #1A1A1A; }
+        .color-popup-swatch {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          border: 2px solid #E4E4E7;
+          cursor: pointer;
+          transition: all 0.15s;
+          position: relative;
+        }
+        .color-popup-swatch:hover { border-color: #1A1A1A; transform: scale(1.1); }
+        .color-popup-swatch.selected { border-color: #1A1A1A; }
+        .color-popup-swatch.selected::after {
+          content: '';
+          position: absolute;
+          inset: 3px;
+          border-radius: 50%;
+          border: 2px solid #fff;
         }
         .discount-badge {
           background: rgba(22, 163, 74, 0.08);
@@ -78,37 +191,73 @@ export default function ProductCard({ product, onAddToCart, onProductClick, styl
       <div
         style={{
           position: "relative",
-          overflow: "hidden",
+          overflow: "visible",
           width: "100%",
           aspectRatio: "3/4",
           borderRadius: "14px"
         }}
       >
-        <img
-          src={product.images?.[0] || product.image}
-          alt={product.name}
-          loading="lazy"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            display: "block",
-            transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)"
-          }}
-          className="product-card-img"
-        />
+        <div style={{ position: "relative", overflow: "hidden", width: "100%", height: "100%", borderRadius: "14px" }}>
+          <img
+            src={product.images?.[0] || product.image}
+            alt={product.name}
+            loading="lazy"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+              transition: "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)"
+            }}
+            className="product-card-img"
+          />
+        </div>
         {/* Quick Add Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddToCart(product);
-          }}
+          onClick={handleAddClick}
           className="quick-add-circle pointer"
           title="Add to Cart"
           aria-label="Add to Cart"
         >
           <ShoppingBag size={18} weight="bold" />
         </button>
+
+        {/* Selection Popup */}
+        {showPopup && (
+          <div className="size-popup" ref={popupRef} onClick={e => e.stopPropagation()}>
+            {hasColors && (
+              <>
+                <div className="size-popup-title">Color</div>
+                <div className="size-popup-options" style={{ marginBottom: hasSizes ? '8px' : 0 }}>
+                  {product.colors.map((hex, i) => (
+                    <button
+                      key={i}
+                      className={`color-popup-swatch${selectedColor === hex ? ' selected' : ''}`}
+                      style={{ background: hex }}
+                      onClick={() => handleColorSelect(hex)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            {hasSizes && (
+              <>
+                <div className="size-popup-title">Size</div>
+                <div className="size-popup-options">
+                  {product.sizes.map((s) => (
+                    <button
+                      key={s}
+                      className={`size-popup-btn${selectedSize === s ? ' selected' : ''}`}
+                      onClick={() => handleSizeSelect(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Stock Badges */}
         {product.stock === 0 && (
