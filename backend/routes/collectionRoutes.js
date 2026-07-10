@@ -17,6 +17,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
   try {
     const collection = new Collection(req.body);
     const created = await collection.save();
+    if (req.io) req.io.emit('collection_added', created);
     res.status(201).json(created);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -27,6 +28,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
     const updated = await Collection.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Collection not found' });
+    if (req.io) req.io.emit('collection_updated', updated);
     res.json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -36,6 +38,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Collection.findByIdAndDelete(req.params.id);
+    if (req.io) req.io.emit('collection_deleted', req.params.id);
     res.json({ message: 'Collection removed' });
   } catch (error) {
     res.status(404).json({ message: 'Collection not found' });

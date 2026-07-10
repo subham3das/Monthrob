@@ -17,6 +17,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
   try {
     const category = new Category(req.body);
     const createdCategory = await category.save();
+    if (req.io) req.io.emit('category_added', createdCategory);
     res.status(201).json(createdCategory);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -27,6 +28,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
     const updated = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Category not found' });
+    if (req.io) req.io.emit('category_updated', updated);
     res.json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -36,6 +38,7 @@ router.put('/:id', protect, adminOnly, async (req, res) => {
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Category.findByIdAndDelete(req.params.id);
+    if (req.io) req.io.emit('category_deleted', req.params.id);
     res.json({ message: 'Category removed' });
   } catch (error) {
     res.status(404).json({ message: 'Category not found' });

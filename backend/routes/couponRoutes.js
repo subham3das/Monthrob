@@ -17,6 +17,7 @@ router.get('/', async (req, res) => {
 router.post('/', protect, adminOnly, async (req, res) => {
   try {
     const coupon = await Coupon.create({ ...req.body, code: req.body.code?.toUpperCase() });
+    if (req.io) req.io.emit('coupon_added', coupon);
     res.status(201).json(coupon);
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -27,6 +28,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Coupon.findByIdAndDelete(req.params.id);
+    if (req.io) req.io.emit('coupon_deleted', req.params.id);
     res.json({ message: 'Deleted' });
   } catch (e) {
     res.status(500).json({ message: e.message });

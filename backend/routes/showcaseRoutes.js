@@ -23,10 +23,12 @@ router.post('/', protect, adminOnly, async (req, res) => {
       showcase.subHeadline = req.body.subHeadline;
       showcase.slides = req.body.slides;
       const updatedShowcase = await showcase.save();
+      if (req.io) req.io.emit('showcase_updated', updatedShowcase);
       res.json(updatedShowcase);
     } else {
       showcase = new Showcase(req.body);
       const createdShowcase = await showcase.save();
+      if (req.io) req.io.emit('showcase_updated', createdShowcase);
       res.status(201).json(createdShowcase);
     }
   } catch (error) {

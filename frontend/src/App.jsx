@@ -238,25 +238,30 @@ function App() {
     socket.on('product_added', (newProd) => {
       setProducts(prev => [newProd, ...prev]);
     });
+    socket.on('product_updated', (updatedProd) => {
+      setProducts(prev => prev.map(p => p._id === updatedProd._id ? updatedProd : p));
+    });
     socket.on('product_deleted', (prodId) => {
       setProducts(prev => prev.filter(p => p._id !== prodId && p.id !== prodId));
     });
     socket.on('order_updated', (updatedOrder) => {
       setOrders(prev => prev.map(o => (o._id === updatedOrder._id ? updatedOrder : o)));
-      if (trackingOrder && trackingOrder._id === updatedOrder._id) {
-        setTrackingOrder(updatedOrder);
-      }
+      setTrackingOrder(prev => prev && prev._id === updatedOrder._id ? updatedOrder : prev);
     });
-    socket.on('order_placed', () => {
+    socket.on('order_placed', (newOrder) => {
       fetchCollectiveJar().then(res => setCollectiveJar(res.data)).catch(console.error);
+      if (authUser?._id && newOrder?.user?._id === authUser._id) {
+        setOrders(prev => [newOrder, ...(Array.isArray(prev) ? prev : [])]);
+      }
     });
     return () => {
       socket.off('product_added');
+      socket.off('product_updated');
       socket.off('product_deleted');
       socket.off('order_updated');
       socket.off('order_placed');
     };
-  }, [trackingOrder]);
+  }, [trackingOrder, authUser]);
 
   // Sync cart to LocalStorage
   useEffect(() => {

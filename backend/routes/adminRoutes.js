@@ -83,6 +83,7 @@ router.post('/', protect, adminOnly, async (req, res) => {
     if (existing) return res.status(400).json({ message: 'Admin already exists' });
 
     const admin = await Admin.create({ email, name: name || email.split('@')[0] });
+    if (req.io) req.io.emit('admin_added', admin);
     res.status(201).json(admin);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -95,6 +96,7 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
     if (!target) return res.status(404).json({ message: 'Admin not found' });
     if (target.isSuperAdmin) return res.status(403).json({ message: 'Cannot remove super admin' });
     await Admin.findByIdAndDelete(req.params.id);
+    if (req.io) req.io.emit('admin_deleted', req.params.id);
     res.json({ message: 'Admin removed' });
   } catch (error) {
     res.status(400).json({ message: error.message });

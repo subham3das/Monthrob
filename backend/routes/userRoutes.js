@@ -206,6 +206,7 @@ router.put('/:id/block', protect, adminOnly, async (req, res) => {
     if (user) {
       user.isBlocked = !user.isBlocked;
       await user.save();
+      if (req.io) req.io.emit('user_updated', { _id: user._id, name: user.name, email: user.email, isBlocked: user.isBlocked });
       res.json(user);
     } else {
       res.status(404).json({ message: 'User not found' });
@@ -218,6 +219,7 @@ router.put('/:id/block', protect, adminOnly, async (req, res) => {
 router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
+    if (req.io) req.io.emit('user_deleted', req.params.id);
     res.json({ message: 'User removed' });
   } catch (error) {
     res.status(404).json({ message: 'User not found' });

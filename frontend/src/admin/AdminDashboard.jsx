@@ -254,6 +254,63 @@ export default function AdminDashboard({ adminUser, onLogout }) {
     loadDashboardData();
   }, []);
 
+  // Real-time socket listeners for admin dashboard
+  useEffect(() => {
+    socket.on('order_placed', (newOrder) => {
+      setOrders(prev => [newOrder, ...(Array.isArray(prev) ? prev : [])]);
+    });
+    socket.on('order_updated', (updatedOrder) => {
+      setOrders(prev => Array.isArray(prev) ? prev.map(o => o._id === updatedOrder._id ? updatedOrder : o) : prev);
+    });
+    socket.on('product_added', (newProd) => {
+      setProducts(prev => [newProd, ...(Array.isArray(prev) ? prev : [])]);
+    });
+    socket.on('product_updated', (updatedProd) => {
+      setProducts(prev => Array.isArray(prev) ? prev.map(p => p._id === updatedProd._id ? updatedProd : p) : prev);
+    });
+    socket.on('product_deleted', (prodId) => {
+      setProducts(prev => Array.isArray(prev) ? prev.filter(p => p._id !== prodId) : prev);
+    });
+    socket.on('category_added', () => { fetchCategories().then(r => setCategories(r.data)).catch(() => {}); });
+    socket.on('category_updated', () => { fetchCategories().then(r => setCategories(r.data)).catch(() => {}); });
+    socket.on('category_deleted', () => { fetchCategories().then(r => setCategories(r.data)).catch(() => {}); });
+    socket.on('collection_added', () => { fetchCollections().then(r => setCollections(r.data)).catch(() => {}); });
+    socket.on('collection_updated', () => { fetchCollections().then(r => setCollections(r.data)).catch(() => {}); });
+    socket.on('collection_deleted', () => { fetchCollections().then(r => setCollections(r.data)).catch(() => {}); });
+    socket.on('coupon_added', () => { fetchCoupons().then(r => setCoupons(r.data)).catch(() => {}); });
+    socket.on('coupon_deleted', () => { fetchCoupons().then(r => setCoupons(r.data)).catch(() => {}); });
+    socket.on('user_updated', () => { fetchUsers().then(r => setUsers(r.data)).catch(() => {}); });
+    socket.on('user_deleted', () => { fetchUsers().then(r => setUsers(r.data)).catch(() => {}); });
+    socket.on('admin_added', () => { fetchAdmins().then(r => setAdmins(r.data)).catch(() => {}); });
+    socket.on('admin_deleted', () => { fetchAdmins().then(r => setAdmins(r.data)).catch(() => {}); });
+    socket.on('showcase_updated', () => {
+      fetchShowcase().then(r => {
+        setShowcaseHeadlines({ main: r.data.mainHeadline, sub: r.data.subHeadline });
+        setShowcaseSlides(r.data.slides && r.data.slides.length > 0 ? r.data.slides : [{ id: Date.now(), media: null, linkType: "None" }]);
+      }).catch(() => {});
+    });
+    return () => {
+      socket.off('order_placed');
+      socket.off('order_updated');
+      socket.off('product_added');
+      socket.off('product_updated');
+      socket.off('product_deleted');
+      socket.off('category_added');
+      socket.off('category_updated');
+      socket.off('category_deleted');
+      socket.off('collection_added');
+      socket.off('collection_updated');
+      socket.off('collection_deleted');
+      socket.off('coupon_added');
+      socket.off('coupon_deleted');
+      socket.off('user_updated');
+      socket.off('user_deleted');
+      socket.off('admin_added');
+      socket.off('admin_deleted');
+      socket.off('showcase_updated');
+    };
+  }, []);
+
   const handleAddSlide = () => {
     if (showcaseSlides.length < 5) {
       setShowcaseSlides([...showcaseSlides, { id: Date.now(), media: null, linkType: "None" }]);
