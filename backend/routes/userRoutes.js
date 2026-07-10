@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, adminOnly } from '../middleware/auth.js';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import { OAuth2Client } from 'google-auth-library';
@@ -62,13 +63,24 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
     
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ message: 'JWT_SECRET not configured on server' });
+    }
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      secret,
+      { expiresIn: '30d' }
+    );
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
       role: user.role,
-      isBlocked: user.isBlocked
+      isBlocked: user.isBlocked,
+      token
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -127,6 +139,16 @@ router.post('/google-login', async (req, res) => {
       await user.save();
     }
     
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ message: 'JWT_SECRET not configured on server' });
+    }
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      secret,
+      { expiresIn: '30d' }
+    );
+
     res.json({
       _id: user._id,
       name: user.name,
@@ -134,7 +156,8 @@ router.post('/google-login', async (req, res) => {
       phone: user.phone,
       role: user.role,
       isBlocked: user.isBlocked,
-      avatar: payload.picture
+      avatar: payload.picture,
+      token
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -151,7 +174,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.put('/:id/block', async (req, res) => {
+router.put('/:id/block', protect, adminOnly, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (user) {
@@ -166,7 +189,7 @@ router.put('/:id/block', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'User removed' });

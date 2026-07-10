@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, adminOnly } from '../middleware/auth.js';
 import Collection from '../models/Collection.js';
 
 const router = express.Router();
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', protect, adminOnly, async (req, res) => {
   try {
     const collection = new Collection(req.body);
     const created = await collection.save();
@@ -22,7 +23,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
     const updated = await Collection.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Collection not found' });
@@ -32,7 +33,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Collection.findByIdAndDelete(req.params.id);
     res.json({ message: 'Collection removed' });

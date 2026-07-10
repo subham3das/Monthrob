@@ -3,9 +3,12 @@ import axios from 'axios';
 const API = axios.create({ baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api` });
 
 API.interceptors.request.use((req) => {
-  const userInfo = localStorage.getItem('adminInfo');
+  const userInfo = localStorage.getItem('monthrob_admin_auth');
   if (userInfo) {
-    req.headers.Authorization = `Bearer ${JSON.parse(userInfo).token}`;
+    const parsed = JSON.parse(userInfo);
+    if (parsed.token) {
+      req.headers.Authorization = `Bearer ${parsed.token}`;
+    }
   }
   return req;
 });

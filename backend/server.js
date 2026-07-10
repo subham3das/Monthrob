@@ -25,6 +25,11 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is not set.');
+  process.exit(1);
+}
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

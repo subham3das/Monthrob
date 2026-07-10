@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, adminOnly } from '../middleware/auth.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 
@@ -69,7 +70,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
     const { status, trackingLink } = req.body;
     const order = await Order.findById(req.params.id);
@@ -100,7 +101,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/', async (req, res) => {
+router.delete('/', protect, adminOnly, async (req, res) => {
   try {
     const result = await Order.deleteMany({});
     res.json({ message: 'All orders deleted successfully', deletedCount: result.deletedCount });
@@ -109,7 +110,7 @@ router.delete('/', async (req, res) => {
   }
 });
 
-router.put('/reset-revenue', async (req, res) => {
+router.put('/reset-revenue', protect, adminOnly, async (req, res) => {
   try {
     const result = await Order.updateMany({}, { $set: { totalAmount: 0 } });
     res.json({ message: 'All revenue reset to 0', modifiedCount: result.modifiedCount });
@@ -118,7 +119,7 @@ router.put('/reset-revenue', async (req, res) => {
   }
 });
 
-router.put('/reset-fund', async (req, res) => {
+router.put('/reset-fund', protect, adminOnly, async (req, res) => {
   try {
     const result = await Order.updateMany({}, { $set: { donation: 0 } });
     res.json({ message: 'Fund reset to 0%', modifiedCount: result.modifiedCount });

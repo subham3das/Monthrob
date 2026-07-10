@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, adminOnly } from '../middleware/auth.js';
 import Coupon from '../models/Coupon.js';
 
 const router = express.Router();
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // Create
-router.post('/', async (req, res) => {
+router.post('/', protect, adminOnly, async (req, res) => {
   try {
     const coupon = await Coupon.create({ ...req.body, code: req.body.code?.toUpperCase() });
     res.status(201).json(coupon);
@@ -23,7 +24,7 @@ router.post('/', async (req, res) => {
 });
 
 // Delete
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Coupon.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });

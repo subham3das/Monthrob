@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, adminOnly } from '../middleware/auth.js';
 import Category from '../models/Category.js';
 
 const router = express.Router();
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', protect, adminOnly, async (req, res) => {
   try {
     const category = new Category(req.body);
     const createdCategory = await category.save();
@@ -22,7 +23,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', protect, adminOnly, async (req, res) => {
   try {
     const updated = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Category not found' });
@@ -32,7 +33,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Category.findByIdAndDelete(req.params.id);
     res.json({ message: 'Category removed' });

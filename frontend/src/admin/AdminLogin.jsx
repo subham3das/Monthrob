@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ShieldCheck, EnvelopeSimple, Lock, ArrowRight, SpinnerGap } from "@phosphor-icons/react";
 import { useGoogleLogin } from "@react-oauth/google";
-import { googleLoginUser } from "../api";
+import { loginUser, googleLoginUser } from "../api";
 
 export default function AdminLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -10,7 +10,7 @@ export default function AdminLogin({ onLoginSuccess }) {
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -20,22 +20,18 @@ export default function AdminLogin({ onLoginSuccess }) {
     }
 
     setLoading(true);
-    // Simulate login validation
-    setTimeout(() => {
-      if (email === "admin@monthrob.com" && password === "admin123") {
-        const user = {
-          id: Date.now(),
-          name: "Admin User",
-          email: email,
-          role: "admin",
-          loginMethod: "credentials",
-        };
-        onLoginSuccess(user);
-      } else {
-        setError("Invalid email or password");
+    try {
+      const res = await loginUser({ email, password });
+      if (res.data.role !== "admin") {
+        setError("Access denied. Admin credentials required.");
+        setLoading(false);
+        return;
       }
+      onLoginSuccess(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid email or password");
       setLoading(false);
-    }, 1200);
+    }
   };
 
   const handleGoogleSignIn = useGoogleLogin({
@@ -317,7 +313,7 @@ export default function AdminLogin({ onLoginSuccess }) {
               </div>
               <input
                 type="text"
-                placeholder="admin@monthrob.com"
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={() => setFocusedField("email")}
@@ -371,7 +367,7 @@ export default function AdminLogin({ onLoginSuccess }) {
           Sign in with Google
         </button>
 
-        <p className="footer-note">Demo creds: admin@monthrob.com / admin123</p>
+        <p className="footer-note">Authorized personnel only</p>
       </div>
     </div>
   );

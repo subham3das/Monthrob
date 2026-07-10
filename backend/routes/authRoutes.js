@@ -33,10 +33,13 @@ router.post('/google', async (req, res) => {
       return res.status(403).json({ message: 'User is blocked' });
     }
 
-    // Create custom JWT token
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return res.status(500).json({ message: 'JWT_SECRET not configured on server' });
+    }
     const jwtToken = jwt.sign(
       { id: user._id, role: user.role }, 
-      process.env.JWT_SECRET || 'secret123', 
+      secret,
       { expiresIn: '30d' }
     );
 

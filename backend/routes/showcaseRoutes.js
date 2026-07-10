@@ -1,4 +1,5 @@
 import express from 'express';
+import { protect, adminOnly } from '../middleware/auth.js';
 import Showcase from '../models/Showcase.js';
 
 const router = express.Router();
@@ -14,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update or create the showcase singleton
-router.post('/', async (req, res) => {
+router.post('/', protect, adminOnly, async (req, res) => {
   try {
     let showcase = await Showcase.findOne({});
     if (showcase) {
