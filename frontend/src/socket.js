@@ -1,6 +1,10 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "https://monthrob.onrender.com";
+const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const envUrl = import.meta.env.VITE_API_URL;
+const SOCKET_URL = isDev
+  ? (envUrl || 'http://localhost:5000')
+  : (envUrl && !envUrl.includes('localhost') ? envUrl : 'https://monthrob.onrender.com');
 
 const socket = io(SOCKET_URL, {
   autoConnect: true,

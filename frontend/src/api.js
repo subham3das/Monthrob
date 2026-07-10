@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: `${import.meta.env.VITE_API_URL || 'https://monthrob.onrender.com'}/api` });
+const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const envUrl = import.meta.env.VITE_API_URL;
+const API_URL = isDev
+  ? (envUrl || 'http://localhost:5000')
+  : (envUrl && !envUrl.includes('localhost') ? envUrl : 'https://monthrob.onrender.com');
+const API = axios.create({ baseURL: `${API_URL}/api` });
 
 API.interceptors.request.use((req) => {
   const adminInfo = localStorage.getItem('monthrob_admin_auth');
