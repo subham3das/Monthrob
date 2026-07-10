@@ -12,7 +12,7 @@ export default function MobileNav({
 }) {
   return (
     <div
-      className="mobile-only glass"
+      className="mobile-only"
       style={{
         position: "fixed",
         bottom: 0,
@@ -24,8 +24,9 @@ export default function MobileNav({
         gridTemplateColumns: isAdminMode ? "1fr 1fr 1fr 1fr 1fr" : "1fr 1fr 1fr 1fr",
         alignItems: "center",
         justifyItems: "center",
-        borderTop: "1px solid var(--color-border)",
-        paddingBottom: "env(safe-area-inset-bottom)" // iOS Safe Area support
+        background: "#FFFFFF",
+        borderTop: "1px solid #EAEAEA",
+        paddingBottom: "env(safe-area-inset-bottom)"
       }}
     >
       {/* Home Button */}

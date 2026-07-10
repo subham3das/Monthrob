@@ -54,7 +54,7 @@ export default function Header({
   };
 
   return (
-    <header className="glass" style={{
+    <header style={{
       position: "sticky",
       top: 0,
       width: "100%",
@@ -64,7 +64,8 @@ export default function Header({
       alignItems: "center",
       justifyContent: "space-between",
       padding: "0 2rem",
-      transition: "var(--transition-smooth)"
+      background: "#FFFFFF",
+      borderBottom: "1px solid #EAEAEA"
     }}>
       {searchActive ? (
         <form onSubmit={handleSearchSubmit} style={{
