@@ -226,6 +226,13 @@ function App() {
     }
   }, [activePage, isAdminMode]);
 
+  // If activePage is profile but user is not logged in, redirect to login
+  useEffect(() => {
+    if (activePage === "profile" && !authUser) {
+      setActivePage("login");
+    }
+  }, [activePage, authUser]);
+
   
   useEffect(() => {
     socket.on('product_added', (newProd) => {
