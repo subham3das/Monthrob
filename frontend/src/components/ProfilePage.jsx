@@ -885,7 +885,7 @@ export default function ProfilePage({
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <div className="recent-order-img-container">
                       <img
-                        src={ongoingOrder.items?.[0]?.product?.images?.[0] || ongoingOrder.items?.[0]?.image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=200&auto=format&fit=crop&q=80"}
+                        src={ongoingOrder.items?.[0]?.product?.images?.[0] || ""}
                         alt={ongoingOrder.items?.[0]?.product?.name || ongoingOrder.items?.[0]?.name || "streetwear bundle"}
                       />
                     </div>
@@ -1021,7 +1021,7 @@ export default function ProfilePage({
               <div className="recent-order-left">
                 <div className="recent-order-img-container">
                   <img
-                    src={pastOrder.items?.[0]?.product?.images?.[0] || pastOrder.items?.[0]?.image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=200&auto=format&fit=crop&q=80"}
+                    src={pastOrder.items?.[0]?.product?.images?.[0] || pastOrder.items?.[0]?.image || ""}
                     alt={pastOrder.items?.[0]?.product?.name || pastOrder.items?.[0]?.name}
                   />
                 </div>
@@ -1137,7 +1137,7 @@ export default function ProfilePage({
                       <div key={idx} className="order-hist-item-row">
                         <img
                           className="order-hist-item-img"
-                          src={item.product?.images?.[0] || item.image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=100&auto=format&fit=crop&q=80"}
+                          src={item.product?.images?.[0] || ""}
                           alt={item.product?.name || item.name}
                         />
                         <span className="order-hist-item-name">{item.product?.name || item.name}</span>
@@ -1298,7 +1298,7 @@ export default function ProfilePage({
               <div key={idx} className="recent-order-box" style={{ cursor: "default" }}>
                 <div className="recent-order-left">
                   <div className="recent-order-img-container">
-                    <img src={item.product?.images?.[0] || item.image || "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=200&auto=format&fit=crop&q=80"} alt={item.product?.name || item.name} />
+                    <img src={item.product?.images?.[0] || item.image || ""} alt={item.product?.name || item.name} />
                   </div>
                   <div>
                     <h4 className="recent-order-title">{item.product?.name || item.name}</h4>
