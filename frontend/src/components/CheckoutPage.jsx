@@ -15,7 +15,9 @@ import {
 export default function CheckoutPage({
   cartItems = [],
   userProfile = { name: "Subham Das", phone: "09954060000" },
+  authUser,
   onPlaceOrder,
+  onLoginRequired,
   addresses = [],
   setAddresses
 }) {
@@ -97,6 +99,7 @@ export default function CheckoutPage({
   };
 
   const handlePlaceOrderSubmit = async () => {
+    if (!authUser) { onLoginRequired?.(); return; }
     if (cartItems.length === 0) { alert("Your cart is empty."); return; }
     if (addresses.length === 0) { alert("Please add a shipping address before placing the order."); return; }
 

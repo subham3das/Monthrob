@@ -554,8 +554,10 @@ function App() {
           <CheckoutPage
             cartItems={cartItems}
             userProfile={userProfile}
+            authUser={authUser}
             onPlaceOrder={handlePlaceOrder}
             onBack={() => setActivePage("shop")}
+            onLoginRequired={() => setActivePage("login")}
             addresses={addresses}
             setAddresses={setAddresses}
           />
