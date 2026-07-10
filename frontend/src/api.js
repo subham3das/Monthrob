@@ -61,4 +61,6 @@ export const deleteCollection = (id) => API.delete(`/collections/${id}`);
 export const createPaymentOrder = (amount) => API.post('/payment/create-order', { amount });
 export const verifyPayment = (data) => API.post('/payment/verify', data);
 
+export const adminGoogleLogin = (credential) => API.post('/admin/google-login', { credential });
+
 export default API;

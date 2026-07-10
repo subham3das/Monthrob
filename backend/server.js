@@ -17,6 +17,7 @@ import showcaseRoutes from './routes/showcaseRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import collectionRoutes from './routes/collectionRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 import { fileURLToPath } from 'url';
 
@@ -67,6 +68,7 @@ app.use('/api/showcase', showcaseRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

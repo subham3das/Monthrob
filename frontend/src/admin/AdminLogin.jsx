@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ShieldCheck, EnvelopeSimple, Lock, ArrowRight, SpinnerGap } from "@phosphor-icons/react";
 import { useGoogleLogin } from "@react-oauth/google";
-import { loginUser, googleLoginUser } from "../api";
+import { loginUser, adminGoogleLogin } from "../api";
 
 export default function AdminLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -39,7 +39,7 @@ export default function AdminLogin({ onLoginSuccess }) {
       setLoading(true);
       setError("");
       try {
-        const res = await googleLoginUser(tokenResponse.access_token);
+        const res = await adminGoogleLogin(tokenResponse.access_token);
         if (res.data.role !== "admin") {
           setError("Access denied. Admin credentials required.");
           setLoading(false);
