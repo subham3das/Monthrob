@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import { protect, adminOnly } from '../middleware/auth.js';
 import Admin from '../models/Admin.js';
 
 const router = express.Router();
@@ -60,6 +61,40 @@ router.post('/google-login', async (req, res) => {
   } catch (error) {
     console.error('Admin auth error:', error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/', protect, adminOnly, async (req, res) => {
+  try {
+    const admins = await Admin.find({}).lean();
+    res.json(admins);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/', protect, adminOnly, async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const existing = await Admin.findOne({ email });
+    if (existing) return res.status(400).json({ message: 'Admin already exists' });
+
+    const admin = await Admin.create({ email, name: name || email.split('@')[0] });
+    res.status(201).json(admin);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.delete('/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const admin = await Admin.findByIdAndDelete(req.params.id);
+    if (!admin) return res.status(404).json({ message: 'Admin not found' });
+    res.json({ message: 'Admin removed' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 

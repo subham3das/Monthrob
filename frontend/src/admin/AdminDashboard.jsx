@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api, { fetchProducts, fetchCategories, fetchOrders, fetchCoupons, fetchUsers, fetchShowcase, blockUser as apiBlockUser, deleteUser as apiDeleteUser, updateShowcase, uploadImage, fetchCollections, addCollection, deleteCollection, deleteProduct, updateCollection, updateCategory, deleteAllOrders, resetAllRevenue, resetFund } from "../api";
+import api, { fetchProducts, fetchCategories, fetchOrders, fetchCoupons, fetchUsers, fetchShowcase, blockUser as apiBlockUser, deleteUser as apiDeleteUser, updateShowcase, uploadImage, fetchCollections, addCollection, deleteCollection, deleteProduct, updateCollection, updateCategory, deleteAllOrders, resetAllRevenue, resetFund, fetchAdmins, addAdmin, removeAdmin } from "../api";
 import socket from "../socket";
 import {
   SquaresFour,
@@ -210,7 +210,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
     const loadDashboardData = async () => {
       try {
         const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes] = await Promise.all([
-          fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections()
+          fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections(), fetchAdmins()
         ]);
         setProducts(prodRes.data);
         setCategories(catRes.data);
@@ -218,6 +218,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
         setOrders(ordRes.data);
         setCoupons(coupRes.data);
         setUsers(userRes.data);
+        if (res[8]) setAdmins(res[8].data);
         setShowcaseHeadlines({ main: showRes.data.mainHeadline, sub: showRes.data.subHeadline });
         setShowcaseSlides(showRes.data.slides && showRes.data.slides.length > 0 ? showRes.data.slides : [{ id: Date.now(), media: null, linkType: "None" }]);
       } catch (err) {
@@ -288,6 +289,9 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   const [resetConfirmStage, setResetConfirmStage] = useState(0); // 0 = default, 1 = confirm, 2 = done
   const [revenueResetStage, setRevenueResetStage] = useState(0);
   const [deleteOrdersStage, setDeleteOrdersStage] = useState(0);
+  const [admins, setAdmins] = useState([]);
+  const [adminEmailInput, setAdminEmailInput] = useState("");
+  const [addingAdmin, setAddingAdmin] = useState(false);
   const [fundResetStage, setFundResetStage] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -1444,6 +1448,79 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                             <Trash size={16} weight="bold" />
                           </button>
                         </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="table-card">
+              <h2 className="table-title">Admin Access</h2>
+              <p style={{ fontSize: '13px', color: '#71717A', marginBottom: '16px' }}>
+                Only these emails can log in to the admin panel via Google.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                <input
+                  type="email"
+                  placeholder="Enter email to grant admin access"
+                  value={adminEmailInput}
+                  onChange={(e) => setAdminEmailInput(e.target.value)}
+                  style={{
+                    flex: 1, padding: '10px 14px', borderRadius: '10px',
+                    border: '1.5px solid #E4E4E7', fontSize: '14px', outline: 'none'
+                  }}
+                />
+                <button
+                  className="btn-action"
+                  style={{ background: '#0F0F0F', padding: '10px 20px', whiteSpace: 'nowrap' }}
+                  disabled={addingAdmin || !adminEmailInput.trim()}
+                  onClick={async () => {
+                    setAddingAdmin(true);
+                    try {
+                      await addAdmin(adminEmailInput.trim());
+                      setAdminEmailInput("");
+                      const { data } = await fetchAdmins();
+                      setAdmins(data);
+                    } catch (err) {
+                      alert(err.response?.data?.message || "Failed to add admin");
+                    }
+                    setAddingAdmin(false);
+                  }}
+                >
+                  {addingAdmin ? "Adding..." : "Add Admin"}
+                </button>
+              </div>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>EMAIL</th>
+                    <th>NAME</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {admins.map(admin => (
+                    <tr key={admin._id}>
+                      <td>{admin.email}</td>
+                      <td>{admin.name || '-'}</td>
+                      <td>
+                        <button
+                          className="btn-action"
+                          style={{ background: '#EF4444', padding: '6px 12px' }}
+                          onClick={async () => {
+                            if (window.confirm(`Remove ${admin.email} from admin access?`)) {
+                              try {
+                                await removeAdmin(admin._id);
+                                setAdmins(admins.filter(a => a._id !== admin._id));
+                              } catch (err) {
+                                alert(err.response?.data?.message || "Failed to remove");
+                              }
+                            }
+                          }}
+                        >
+                          <Trash size={16} weight="bold" />
+                        </button>
                       </td>
                     </tr>
                   ))}

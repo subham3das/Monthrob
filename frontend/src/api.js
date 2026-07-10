@@ -62,5 +62,8 @@ export const createPaymentOrder = (amount) => API.post('/payment/create-order', 
 export const verifyPayment = (data) => API.post('/payment/verify', data);
 
 export const adminGoogleLogin = (credential) => API.post('/admin/google-login', { credential });
+export const fetchAdmins = () => API.get('/admin');
+export const addAdmin = (email) => API.post('/admin', { email });
+export const removeAdmin = (id) => API.delete(`/admin/${id}`);
 
 export default API;
