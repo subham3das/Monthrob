@@ -8,21 +8,23 @@ const API_URL = isDev
 const API = axios.create({ baseURL: `${API_URL}/api` });
 
 API.interceptors.request.use((req) => {
-  const adminInfo = localStorage.getItem('monthrob_admin_auth');
-  if (adminInfo) {
-    const parsed = JSON.parse(adminInfo);
-    if (parsed.token) {
-      req.headers.Authorization = `Bearer ${parsed.token}`;
-      return req;
+  try {
+    const adminInfo = localStorage.getItem('monthrob_admin_auth');
+    if (adminInfo && adminInfo !== 'null') {
+      const parsed = JSON.parse(adminInfo);
+      if (parsed && parsed.token) {
+        req.headers.Authorization = `Bearer ${parsed.token}`;
+        return req;
+      }
     }
-  }
-  const userInfo = localStorage.getItem('monthrob_auth');
-  if (userInfo) {
-    const parsed = JSON.parse(userInfo);
-    if (parsed.token) {
-      req.headers.Authorization = `Bearer ${parsed.token}`;
+    const userInfo = localStorage.getItem('monthrob_auth');
+    if (userInfo && userInfo !== 'null') {
+      const parsed = JSON.parse(userInfo);
+      if (parsed && parsed.token) {
+        req.headers.Authorization = `Bearer ${parsed.token}`;
+      }
     }
-  }
+  } catch (e) {}
   return req;
 });
 

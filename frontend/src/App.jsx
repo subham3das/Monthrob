@@ -80,11 +80,19 @@ function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem("monthrob_profile", JSON.stringify(userProfile));
+    if (userProfile) {
+      localStorage.setItem("monthrob_profile", JSON.stringify(userProfile));
+    } else {
+      localStorage.removeItem("monthrob_profile");
+    }
   }, [userProfile]);
 
   useEffect(() => {
-    localStorage.setItem("monthrob_auth", JSON.stringify(authUser));
+    if (authUser) {
+      localStorage.setItem("monthrob_auth", JSON.stringify(authUser));
+    } else {
+      localStorage.removeItem("monthrob_auth");
+    }
   }, [authUser]);
 
   const [addresses, setAddresses] = useState([]);
