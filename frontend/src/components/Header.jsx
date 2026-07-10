@@ -375,14 +375,14 @@ export default function Header({
 
                 return (
                   <div
-                    key={prod.id}
+                    key={prod._id}
                     className="search-result-item"
                     onClick={() => {
                       onProductClick(prod);
                       clearSearch();
                     }}
                   >
-                    <img src={prod.image} alt={prod.name} className="search-result-thumb" />
+                    <img src={prod.images?.[0]} alt={prod.name} className="search-result-thumb" />
                     <div className="search-result-middle">
                       <div className="search-result-name">{titleNode}</div>
                       <div className="search-result-collection">{firstCol}</div>
