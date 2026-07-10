@@ -259,15 +259,23 @@ function App() {
   // Cart Operations
   const handleAddToCart = (product) => {
     setCartItems((prevItems) => {
-      const existing = prevItems.find((item) => (item._id || item.id) === (product._id || product.id));
+      const existing = prevItems.find((item) =>
+        (item._id || item.id) === (product._id || product.id) &&
+        (item.selectedSize || '') === (product.selectedSize || '') &&
+        (item.selectedColor || '') === (product.selectedColor || '')
+      );
       if (existing) {
         return prevItems.map((item) =>
-          (item._id || item.id) === (product._id || product.id) ? { ...item, quantity: item.quantity + 1 } : item
+          (item._id || item.id) === (product._id || product.id) &&
+          (item.selectedSize || '') === (product.selectedSize || '') &&
+          (item.selectedColor || '') === (product.selectedColor || '')
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
       }
       return [...prevItems, { ...product, quantity: 1 }];
     });
-    setCartOpen(true); // Open cart to show item added
+    setCartOpen(true);
   };
 
   const handleRemoveFromCart = (productId) => {
@@ -296,7 +304,7 @@ function App() {
     try {
       const orderData = {
         user: authUser?._id, // Assume logged in, or handle guest
-        items: checkoutDetails.items.map(i => ({ product: i._id || i.id, quantity: i.quantity, priceAtTime: i.price })),
+        items: checkoutDetails.items.map(i => ({ product: i._id || i.id, quantity: i.quantity, priceAtTime: i.price, size: i.selectedSize || '', color: i.selectedColor || '' })),
         totalAmount: checkoutDetails.total,
         status: "Placed",
         shippingAddress: checkoutDetails.shippingAddress,

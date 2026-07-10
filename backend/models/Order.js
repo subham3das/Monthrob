@@ -6,7 +6,9 @@ const orderSchema = new mongoose.Schema({
   items: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     quantity: { type: Number, required: true },
-    priceAtTime: { type: Number, required: true }
+    priceAtTime: { type: Number, required: true },
+    size: { type: String, default: '' },
+    color: { type: String, default: '' }
   }],
   totalAmount: { type: Number, required: true },
   status: { type: String, enum: ['Placed', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'], default: 'Placed' },

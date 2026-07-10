@@ -28,14 +28,20 @@ router.post('/register', async (req, res) => {
     
     await user.save();
     
-    // For simplicity, just return user info on register so frontend can auto-login
+    const secret = process.env.JWT_SECRET;
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      secret,
+      { expiresIn: '30d' }
+    );
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       phone: user.phone,
       role: user.role,
-      isBlocked: user.isBlocked
+      isBlocked: user.isBlocked,
+      token
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -161,6 +167,26 @@ router.post('/google-login', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.put('/profile', async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    await user.save();
+    res.json({ _id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 

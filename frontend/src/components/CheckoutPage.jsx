@@ -43,15 +43,15 @@ export default function CheckoutPage({
     e.preventDefault();
     if (streetAddress.trim() && city.trim() && zipCode.trim()) {
       const fullAddr = `${streetAddress.trim()}, ${city.trim()}, ${state.trim()} ${zipCode.trim()}, ${country.trim()}`;
-      setAddresses([
-        ...addresses,
-        {
-          id: Date.now(),
-          name: userProfile?.name || (userProfile?.email ? userProfile.email.split('@')[0] : "Guest"),
-          tag: addressLabel.trim() || "Home",
-          addressLine: fullAddr
-        }
-      ]);
+      const newAddr = {
+        id: Date.now(),
+        name: userProfile?.name || (userProfile?.email ? userProfile.email.split('@')[0] : "Guest"),
+        tag: addressLabel.trim() || "Home",
+        addressLine: fullAddr,
+        phone: `${phoneCountry}${phoneNumber}`,
+        email: email || userProfile?.email || ""
+      };
+      setAddresses([newAddr, ...addresses]);
       // Reset form fields
       setAddressLabel("");
       setStreetAddress("");
@@ -102,7 +102,7 @@ export default function CheckoutPage({
 
     const orderData = {
       items: cartItems,
-      shippingAddress: addresses[0]?.addressLine || "No shipping address selected",
+      shippingAddress: addresses[0] || { addressLine: "No shipping address selected" },
       paymentMethod: selectedPayment === "online" ? "Online Payment" : "Cash on Delivery",
       donation: appliedDonation,
       discount: promoDiscount,
@@ -604,6 +604,7 @@ export default function CheckoutPage({
             <div>
               <div className="address-name">{addr.name} ({addr.tag})</div>
               <div className="address-line">{addr.addressLine}</div>
+              {addr.phone && <div className="address-line" style={{ fontSize: '11px', color: '#71717A' }}>{addr.phone}</div>}
             </div>
             <span className="address-chat-icon"><ChatCircleText size={18} weight="bold" /></span>
           </div>
@@ -627,7 +628,7 @@ export default function CheckoutPage({
             <img src={item.images?.[0] || item.image} alt={item.name} className="summary-item-img" />
             <div className="summary-item-details">
               <h4 className="summary-item-name">{item.name}</h4>
-              <p className="summary-item-meta">Size: {item.size} | Color: {item.color}</p>
+              <p className="summary-item-meta">{item.selectedSize ? `Size: ${item.selectedSize}` : ''}{item.selectedSize && item.selectedColor ? ' | ' : ''}{item.selectedColor ? `Color: ${item.selectedColor}` : ''}</p>
               <div className="summary-item-qty">Qty: {item.quantity}</div>
             </div>
             <span className="summary-item-price">Rs. {item.price * item.quantity}</span>

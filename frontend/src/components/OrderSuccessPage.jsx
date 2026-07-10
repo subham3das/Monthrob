@@ -342,7 +342,7 @@ export default function OrderSuccessPage({
             <div className="receipt-item-left">
               <span className="receipt-item-qty">{item.quantity}x</span>
               <span className="receipt-item-name">
-                {item.product?.name || item.name} {item.color ? `(${item.color})` : ""}
+                {item.product?.name || item.name}{item.size ? ` (Size: ${item.size})` : ''}{item.color ? ` (Color: ${item.color})` : ''}
               </span>
             </div>
             <span className="receipt-item-price">Rs. {(item.priceAtTime || item.price) * item.quantity}</span>

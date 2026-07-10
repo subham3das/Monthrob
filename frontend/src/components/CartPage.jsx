@@ -136,6 +136,13 @@ export default function CartPage({
                       {item.name}
                     </h4>
                     <span style={{ fontSize: "0.9rem", opacity: 0.8 }}>Rs. {item.price}</span>
+                    {(item.selectedSize || item.selectedColor) && (
+                      <div style={{ fontSize: "0.75rem", color: "#71717A", marginTop: "2px" }}>
+                        {item.selectedSize && <span>Size: {item.selectedSize}</span>}
+                        {item.selectedSize && item.selectedColor && <span> | </span>}
+                        {item.selectedColor && <span>Color: <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: item.selectedColor, verticalAlign: 'middle', marginLeft: 2 }} /></span>}
+                      </div>
+                    )}
                   </div>
 
                   {/* Quantity Controls & Remove */}

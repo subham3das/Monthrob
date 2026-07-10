@@ -72,24 +72,48 @@ function OrderRow({ order, onUpdate }) {
       <td>
         <div style={{ fontWeight: 600 }}>{order.user?.name || 'Guest'}</div>
         <div style={{ fontSize: '11px', color: '#71717A', marginTop: '2px' }}>
+          {order.user?.phone || (typeof order.shippingAddress === 'string' ? '' : order.shippingAddress?.phone || '')}
+        </div>
+        <div style={{ fontSize: '11px', color: '#71717A', marginTop: '2px' }}>
           {typeof order.shippingAddress === 'string' ? '' : (order.shippingAddress?.email || '')}
         </div>
       </td>
       <td>
         <div style={{ 
-          fontSize: '12px', 
+          fontSize: '11px', 
           color: '#3F3F46', 
-          maxWidth: '180px', 
-          display: '-webkit-box', 
-          WebkitLineClamp: 2, 
-          WebkitBoxOrient: 'vertical', 
-          overflow: 'hidden' 
+          maxWidth: '180px' 
         }}>
-          {typeof order.shippingAddress === 'string' ? order.shippingAddress : (order.shippingAddress?.addressLine ? `${order.shippingAddress.addressLine}, ${order.shippingAddress.city}` : 'No address')}
+          {typeof order.shippingAddress === 'string' ? order.shippingAddress : (
+            <>
+              {order.shippingAddress?.phone ? <div style={{ fontWeight: 600, marginBottom: 2 }}>{order.shippingAddress.phone}</div> : null}
+              <div>{order.shippingAddress?.addressLine || 'No address'}</div>
+            </>
+          )}
         </div>
       </td>
       <td>
-        <div style={{ fontWeight: 500 }}>{order.items?.length || 0} items</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '220px' }}>
+          {order.items?.slice(0, 3).map((item, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px' }}>
+              {item.product?.images?.[0] ? (
+                <img src={item.product.images[0]} alt="" style={{ width: '28px', height: '28px', borderRadius: '4px', objectFit: 'cover' }} />
+              ) : null}
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                  {item.product?.name || 'Deleted Product'}
+                </div>
+                <div style={{ color: '#71717A', fontSize: '10px' }}>
+                  x{item.quantity || 1}
+                  {item.size ? ` · Size: ${item.size}` : ''}
+                  {item.color ? ` · Color: ${item.color}` : ''}
+                </div>
+              </div>
+              <span style={{ fontWeight: 600, flexShrink: 0 }}>₹{item.priceAtTime || item.product?.price || 0}</span>
+            </div>
+          ))}
+          {(order.items?.length || 0) > 3 ? <div style={{ fontSize: '10px', color: '#71717A' }}>+{order.items.length - 3} more</div> : null}
+        </div>
       </td>
       <td>
         <div style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>

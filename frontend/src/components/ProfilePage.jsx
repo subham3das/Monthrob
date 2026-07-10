@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../api";
 import {
   PencilSimple,
   CaretRight,
@@ -98,14 +99,17 @@ export default function ProfilePage({
     setEditProfileOpen(true);
   };
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (editName.trim() && editPhone.trim()) {
-      setUserProfile({
-        name: editName.trim(),
-        phone: editPhone.trim()
-      });
+      const updated = { ...userProfile, name: editName.trim(), phone: editPhone.trim() };
+      setUserProfile(updated);
       setEditProfileOpen(false);
+      try {
+        await api.put('/users/profile', { name: editName.trim(), phone: editPhone.trim() });
+      } catch (err) {
+        console.error("Failed to save profile to server", err);
+      }
     }
   };
 
@@ -1157,7 +1161,14 @@ export default function ProfilePage({
                               src={item.product?.images?.[0] || ""}
                               alt={item.product?.name || item.name}
                             />
-                            <span className="order-hist-item-name">{item.product?.name || item.name}</span>
+                            <div style={{ flex: 1 }}>
+                              <span className="order-hist-item-name">{item.product?.name || item.name}</span>
+                              {(item.size || item.color) && (
+                                <div style={{ fontSize: '11px', color: '#71717A', marginTop: '2px' }}>
+                                  {item.size ? `Size: ${item.size}` : ''}{item.size && item.color ? ' | ' : ''}{item.color ? `Color: ${item.color}` : ''}
+                                </div>
+                              )}
+                            </div>
                           </>
                         )}
                         <span className="order-hist-item-qty">x{item.quantity}</span>
@@ -1332,6 +1343,11 @@ export default function ProfilePage({
                         <h4 className="recent-order-title">{item.product?.name || item.name}</h4>
                         <p className="recent-order-status-info">
                           Rs. {item.priceAtTime || item.price} · Qty: {item.quantity}
+                          {(item.size || item.color) && (
+                            <span style={{ display: 'block', fontSize: '11px', color: '#71717A', marginTop: '2px' }}>
+                              {item.size ? `Size: ${item.size}` : ''}{item.size && item.color ? ' | ' : ''}{item.color ? `Color: ${item.color}` : ''}
+                            </span>
+                          )}
                         </p>
                       </div>
                     </>
