@@ -209,7 +209,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes] = await Promise.all([
+        const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes, adminRes] = await Promise.all([
           fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections(), fetchAdmins()
         ]);
         setProducts(prodRes.data);
@@ -218,7 +218,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
         setOrders(ordRes.data);
         setCoupons(coupRes.data);
         setUsers(userRes.data);
-        if (res[8]) setAdmins(res[8].data);
+        if (adminRes) setAdmins(adminRes.data);
         setShowcaseHeadlines({ main: showRes.data.mainHeadline, sub: showRes.data.subHeadline });
         setShowcaseSlides(showRes.data.slides && showRes.data.slides.length > 0 ? showRes.data.slides : [{ id: Date.now(), media: null, linkType: "None" }]);
       } catch (err) {
