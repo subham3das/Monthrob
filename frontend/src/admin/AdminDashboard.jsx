@@ -375,7 +375,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   const [resetConfirmStage, setResetConfirmStage] = useState(0); // 0 = default, 1 = confirm, 2 = done
   const [revenueResetStage, setRevenueResetStage] = useState(0);
   const [deleteOrdersStage, setDeleteOrdersStage] = useState(0);
-  const [admins, setAdmins] = useState([]);
+
   const [adminEmailInput, setAdminEmailInput] = useState("");
   const [addingAdmin, setAddingAdmin] = useState(false);
   const [fundResetStage, setFundResetStage] = useState(0);
