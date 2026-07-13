@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api, { fetchProducts, fetchCategories, fetchOrders, fetchCoupons, fetchUsers, fetchShowcase, blockUser as apiBlockUser, deleteUser as apiDeleteUser, updateShowcase, uploadImage, fetchCollections, addCollection, deleteCollection, deleteProduct, updateCollection, updateCategory, deleteAllOrders, resetAllRevenue, resetFund, fetchAdmins, addAdmin, removeAdmin } from "../api";
+import api, { fetchProducts, fetchCategories, fetchOrders, fetchCoupons, fetchUsers, fetchShowcase, blockUser as apiBlockUser, deleteUser as apiDeleteUser, updateShowcase, uploadImage, fetchCollections, addCollection, deleteCollection, deleteProduct, updateCollection, updateCategory, deleteAllOrders, resetAllRevenue, resetFund, fetchAdmins, addAdmin, removeAdmin, fetchAdminLogs, clearAdminLogs } from "../api";
 import socket from "../socket";
 import {
   SquaresFour,
@@ -15,7 +15,8 @@ import {
   WarningCircle,
   PencilSimple,
   Check,
-  X
+  X,
+  ClipboardText
 } from "@phosphor-icons/react";
 import AddProductModal from "./AddProductModal";
 import EditProductModal from "./EditProductModal";
@@ -222,6 +223,8 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   const [orders, setOrders] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [users, setUsers] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [adminLogs, setAdminLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Showcase state
@@ -233,8 +236,8 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes, adminRes] = await Promise.all([
-          fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections(), fetchAdmins()
+        const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes, adminRes, logsRes] = await Promise.all([
+          fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections(), fetchAdmins(), fetchAdminLogs()
         ]);
         setProducts(prodRes.data);
         setCategories(catRes.data);
@@ -243,6 +246,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
         setCoupons(coupRes.data);
         setUsers(userRes.data);
         if (adminRes) setAdmins(adminRes.data);
+        if (logsRes) setAdminLogs(logsRes.data);
         setShowcaseHeadlines({ main: showRes.data.mainHeadline, sub: showRes.data.subHeadline });
         setShowcaseSlides(showRes.data.slides && showRes.data.slides.length > 0 ? showRes.data.slides : [{ id: Date.now(), media: null, linkType: "None", platform: "All" }]);
       } catch (err) {
@@ -972,6 +976,10 @@ export default function AdminDashboard({ adminUser, onLogout }) {
             <ImageIcon weight={activeTab === 'showcase' ? 'fill' : 'regular'} />
             Showcase
           </button>
+          <button className={`nav-item ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>
+            <ClipboardText weight={activeTab === 'logs' ? 'fill' : 'regular'} />
+            Admin Logs
+          </button>
           {/* Requested Settings Option */}
           <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
             <Gear weight={activeTab === 'settings' ? 'fill' : 'regular'} />
@@ -1445,6 +1453,60 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                 + Add New Slide (Max 5)
               </button>
             )}
+          </>
+        )}
+
+        {activeTab === 'logs' && (
+          <>
+            <header className="page-header">
+              <h1 className="page-title">Activity Logs</h1>
+              {adminUser?.isSuperAdmin && (
+                <button 
+                  className="btn-danger" 
+                  onClick={async () => {
+                    if (window.confirm("Are you sure you want to clear all admin logs? This cannot be undone.")) {
+                      try {
+                        await clearAdminLogs();
+                        setAdminLogs([]);
+                      } catch (err) {
+                        alert(err.response?.data?.message || "Failed to clear logs");
+                      }
+                    }
+                  }}
+                >
+                  <Trash size={16} weight="bold" style={{ marginRight: '8px' }}/>
+                  Clear Logs
+                </button>
+              )}
+            </header>
+            <div className="table-card">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>DATE & TIME</th>
+                    <th>ADMIN EMAIL</th>
+                    <th>ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>No activity logs found.</td>
+                    </tr>
+                  ) : (
+                    adminLogs.map(log => (
+                      <tr key={log._id}>
+                        <td style={{ color: '#71717A', fontSize: '13px' }}>
+                          {new Date(log.createdAt).toLocaleString()}
+                        </td>
+                        <td style={{ fontWeight: 600 }}>{log.adminEmail}</td>
+                        <td>{log.action}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
 

@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import { protect, adminOnly } from '../middleware/auth.js';
 import Admin from '../models/Admin.js';
+import AdminLog from '../models/AdminLog.js';
 
 const router = express.Router();
 
@@ -51,6 +52,8 @@ router.post('/google-login', async (req, res) => {
       { expiresIn: '30d' }
     );
 
+    await AdminLog.create({ adminEmail: payload.email, action: 'Logged In' });
+
     res.json({
       _id: admin._id,
       name: admin.name || payload.name,
@@ -60,7 +63,27 @@ router.post('/google-login', async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Admin auth error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/logs', protect, adminOnly, async (req, res) => {
+  try {
+    const logs = await AdminLog.find({}).sort({ createdAt: -1 }).lean();
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.delete('/logs', protect, adminOnly, async (req, res) => {
+  try {
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({ message: 'Only Super Admin can clear logs' });
+    }
+    await AdminLog.deleteMany({});
+    res.json({ message: 'All logs cleared' });
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });

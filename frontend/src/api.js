@@ -78,7 +78,10 @@ export const verifyPayment = (data) => API.post('/payment/verify', data);
 
 export const adminGoogleLogin = (credential) => API.post('/admin/google-login', { credential });
 export const fetchAdmins = () => API.get('/admin');
-export const addAdmin = (email) => API.post('/admin', { email });
+export const addAdmin = (email, name) => API.post('/admin', { email, name });
 export const removeAdmin = (id) => API.delete(`/admin/${id}`);
+
+export const fetchAdminLogs = () => API.get('/admin/logs');
+export const clearAdminLogs = () => API.delete('/admin/logs');
 
 export default API;

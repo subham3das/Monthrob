@@ -58,6 +58,10 @@ app.use(express.json());
 
 connectDB();
 
+import { logAdminAction } from './middleware/logger.js';
+
+app.use(logAdminAction);
+
 app.use('/api/upload', uploadRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
