@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api, { fetchProducts, fetchCategories, fetchOrders, fetchCoupons, fetchUsers, fetchShowcase, blockUser as apiBlockUser, deleteUser as apiDeleteUser, updateShowcase, uploadImage, fetchCollections, addCollection, deleteCollection, deleteProduct, updateCollection, updateCategory, deleteAllOrders, resetAllRevenue, resetFund, fetchAdmins, addAdmin, removeAdmin, fetchAdminLogs, clearAdminLogs } from "../api";
+import api, { fetchProducts, fetchCategories, fetchOrders, fetchCoupons, fetchUsers, fetchShowcase, blockUser as apiBlockUser, deleteUser as apiDeleteUser, updateShowcase, uploadImage, fetchCollections, addCollection, deleteCollection, deleteProduct, updateCollection, updateCategory, deleteAllOrders, resetAllRevenue, resetFund, fetchAdmins, addAdmin, removeAdmin, fetchAdminLogs, clearAdminLogs, fetchAnalytics } from "../api";
 import socket from "../socket";
 import {
   SquaresFour,
@@ -16,7 +16,8 @@ import {
   PencilSimple,
   Check,
   X,
-  ClipboardText
+  ClipboardText,
+  ChartBar
 } from "@phosphor-icons/react";
 import AddProductModal from "./AddProductModal";
 import EditProductModal from "./EditProductModal";
@@ -225,6 +226,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   const [users, setUsers] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [adminLogs, setAdminLogs] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Showcase state
@@ -236,8 +238,8 @@ export default function AdminDashboard({ adminUser, onLogout }) {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes, adminRes, logsRes] = await Promise.all([
-          fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections(), fetchAdmins(), fetchAdminLogs()
+        const [prodRes, catRes, ordRes, coupRes, userRes, showRes, colRes, adminRes, logsRes, analyticsRes] = await Promise.all([
+          fetchProducts(), fetchCategories(), fetchOrders(), fetchCoupons(), fetchUsers(), fetchShowcase(), fetchCollections(), fetchAdmins(), fetchAdminLogs(), fetchAnalytics()
         ]);
         setProducts(prodRes.data);
         setCategories(catRes.data);
@@ -247,6 +249,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
         setUsers(userRes.data);
         if (adminRes) setAdmins(adminRes.data);
         if (logsRes) setAdminLogs(logsRes.data);
+        if (analyticsRes) setAnalytics(analyticsRes.data);
         setShowcaseHeadlines({ main: showRes.data.mainHeadline, sub: showRes.data.subHeadline });
         setShowcaseSlides(showRes.data.slides && showRes.data.slides.length > 0 ? showRes.data.slides : [{ id: Date.now(), media: null, linkType: "None", platform: "All" }]);
       } catch (err) {
@@ -980,6 +983,10 @@ export default function AdminDashboard({ adminUser, onLogout }) {
             <ClipboardText weight={activeTab === 'logs' ? 'fill' : 'regular'} />
             Admin Logs
           </button>
+          <button className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
+            <ChartBar weight={activeTab === 'analytics' ? 'fill' : 'regular'} />
+            Analytics
+          </button>
           {/* Requested Settings Option */}
           <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>
             <Gear weight={activeTab === 'settings' ? 'fill' : 'regular'} />
@@ -1501,6 +1508,82 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                         </td>
                         <td style={{ fontWeight: 600 }}>{log.adminEmail}</td>
                         <td>{log.action}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'analytics' && (
+          <>
+            <header className="page-header">
+              <h1 className="page-title">Store Analytics</h1>
+            </header>
+            
+            <h2 style={{ marginBottom: "16px", fontSize: "18px", color: "#1A1A1A" }}>Financial Overview</h2>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
+                  <ChartBar size={24} weight="fill" />
+                </div>
+                <div className="stat-label">Total Revenue</div>
+                <div className="stat-value">₹{analytics ? analytics.revenue.total : '0'}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon" style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6' }}>
+                  <SquaresFour size={24} weight="fill" />
+                </div>
+                <div className="stat-label">Net Revenue</div>
+                <div className="stat-value">₹{analytics ? analytics.revenue.total : '0'}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>
+                  <WarningCircle size={24} weight="bold" />
+                </div>
+                <div className="stat-label">Total Users</div>
+                <div className="stat-value">{users.length}</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
+                  <Package size={24} weight="fill" />
+                </div>
+                <div className="stat-label">Active Orders</div>
+                <div className="stat-value">{analytics ? analytics.orders.active : '0'}</div>
+              </div>
+            </div>
+
+            <h2 style={{ marginBottom: "16px", marginTop: "32px", fontSize: "18px", color: "#1A1A1A" }}>Recent Visitors (Last 100)</h2>
+            <div className="table-card">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>DATE & TIME</th>
+                    <th>IP ADDRESS</th>
+                    <th>USER</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!analytics || !analytics.visitors || analytics.visitors.length === 0 ? (
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>No visitor logs found.</td>
+                    </tr>
+                  ) : (
+                    analytics.visitors.map(log => (
+                      <tr key={log._id}>
+                        <td style={{ color: '#71717A', fontSize: '13px' }}>
+                          {new Date(log.createdAt).toLocaleString()}
+                        </td>
+                        <td style={{ fontWeight: 600 }}>{log.ip}</td>
+                        <td>
+                          {log.isGuest ? (
+                            <span style={{ padding: '4px 8px', borderRadius: '4px', background: '#E4E4E7', fontSize: '12px', fontWeight: 'bold' }}>GUEST</span>
+                          ) : (
+                            <span style={{ color: '#3B82F6', fontWeight: 600 }}>{log.email}</span>
+                          )}
+                        </td>
                       </tr>
                     ))
                   )}

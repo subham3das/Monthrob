@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   fetchProducts, fetchCollections, createOrder, fetchMyOrders, useCoupon, fetchCollectiveJar,
-  addCollection, deleteCollection, createProduct, deleteProduct, updateOrder, fetchOrders
+  addCollection, deleteCollection, createProduct, deleteProduct, updateOrder, fetchOrders, logVisit
 } from "./api";
 import socket from "./socket";
 import Header from "./components/Header";
@@ -93,6 +93,8 @@ function App() {
     } else {
       localStorage.removeItem("monthrob_auth");
     }
+    // Log the visit when auth state changes or on initial load
+    logVisit(authUser?._id, authUser?.email).catch(console.error);
   }, [authUser]);
 
   const [addresses, setAddresses] = useState([]);

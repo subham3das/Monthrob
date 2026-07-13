@@ -84,4 +84,7 @@ export const removeAdmin = (id) => API.delete(`/admin/${id}`);
 export const fetchAdminLogs = () => API.get('/admin/logs');
 export const clearAdminLogs = () => API.delete('/admin/logs');
 
+export const logVisit = (userId, email) => API.post('/analytics/visit', { userId, email });
+export const fetchAnalytics = () => API.get('/analytics/stats');
+
 export default API;
