@@ -17,12 +17,16 @@ router.post('/visit', async (req, res) => {
 
     // Only log if they haven't visited in the last hour, OR if they just logged in (so their state changed)
     if (!recentVisit || (userId && recentVisit.isGuest)) {
-      await VisitLog.create({
+      const newLog = await VisitLog.create({
         ip,
         user: userId || null,
         email: email || null,
         isGuest: !userId
       });
+      // Emit the event to all connected admin clients
+      if (req.io) {
+        req.io.emit('newVisit', newLog);
+      }
     }
 
     res.status(200).json({ success: true });

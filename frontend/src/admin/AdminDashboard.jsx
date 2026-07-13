@@ -278,6 +278,15 @@ export default function AdminDashboard({ adminUser, onLogout }) {
     socket.on('product_deleted', (prodId) => {
       setProducts(prev => Array.isArray(prev) ? prev.filter(p => p._id !== prodId) : prev);
     });
+    socket.on('newVisit', (visit) => {
+      setAnalytics(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          visitors: [visit, ...(prev.visitors || [])].slice(0, 100)
+        };
+      });
+    });
     socket.on('category_added', () => { fetchCategories().then(r => setCategories(r.data)).catch(() => {}); });
     socket.on('category_updated', () => { fetchCategories().then(r => setCategories(r.data)).catch(() => {}); });
     socket.on('category_deleted', () => { fetchCategories().then(r => setCategories(r.data)).catch(() => {}); });
@@ -302,6 +311,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
       socket.off('product_added');
       socket.off('product_updated');
       socket.off('product_deleted');
+      socket.off('newVisit');
       socket.off('category_added');
       socket.off('category_updated');
       socket.off('category_deleted');
