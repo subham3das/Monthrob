@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   fetchProducts, fetchCollections, createOrder, fetchMyOrders, useCoupon, fetchCollectiveJar,
   addCollection, deleteCollection, createProduct, deleteProduct, updateOrder, fetchOrders
@@ -96,18 +96,21 @@ function App() {
   }, [authUser]);
 
   const [addresses, setAddresses] = useState([]);
+  const addressesLoaded = useRef(false);
 
   useEffect(() => {
     if (authUser?._id) {
       const saved = localStorage.getItem(`monthrob_addresses_${authUser._id}`);
       setAddresses(saved ? JSON.parse(saved) : []);
+      addressesLoaded.current = true;
     } else {
       setAddresses([]);
+      addressesLoaded.current = false;
     }
   }, [authUser]);
 
   useEffect(() => {
-    if (authUser?._id) {
+    if (authUser?._id && addressesLoaded.current) {
       localStorage.setItem(`monthrob_addresses_${authUser._id}`, JSON.stringify(addresses));
     }
   }, [addresses, authUser]);
@@ -508,6 +511,7 @@ function App() {
           <LoginPage
             setAuthUser={setAuthUser}
             setActivePage={setActivePage}
+            setUserProfile={setUserProfile}
           />
         )}
 
@@ -515,6 +519,7 @@ function App() {
           <SignupPage
             setAuthUser={setAuthUser}
             setActivePage={setActivePage}
+            setUserProfile={setUserProfile}
           />
         )}
 

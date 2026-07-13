@@ -3,7 +3,7 @@ import { Eye, EyeSlash, EnvelopeSimple, Lock, GoogleLogo, ArrowRight, SpinnerGap
 import { loginUser, googleLoginUser } from "../api";
 import { useGoogleLogin } from "@react-oauth/google";
 
-export default function LoginPage({ setAuthUser, setActivePage }) {
+export default function LoginPage({ setAuthUser, setActivePage, setUserProfile }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +32,7 @@ export default function LoginPage({ setAuthUser, setActivePage }) {
       localStorage.setItem("monthrob_auth", JSON.stringify(user));
       const profile = { name: user.name, phone: user.phone || "" };
       localStorage.setItem("monthrob_profile", JSON.stringify(profile));
+      if (setUserProfile) setUserProfile(profile);
       setAuthUser(user);
       setActivePage("home");
     } catch (err) {
@@ -51,6 +52,7 @@ export default function LoginPage({ setAuthUser, setActivePage }) {
         localStorage.setItem("monthrob_auth", JSON.stringify(user));
         const profile = { name: user.name, phone: user.phone || "" };
         localStorage.setItem("monthrob_profile", JSON.stringify(profile));
+        if (setUserProfile) setUserProfile(profile);
         setAuthUser(user);
         setActivePage("home");
       } catch (err) {

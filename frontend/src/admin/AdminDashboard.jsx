@@ -994,7 +994,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
             <header className="page-header">
               <h1 className="page-title">Dashboard Overview</h1>
               <div className="user-status">
-                <span className="loading-text">Loading...</span>
+                <span className="loading-text">{adminUser?.name || adminUser?.email || "Admin"}</span>
                 <div className="avatar-circle"></div>
               </div>
             </header>
@@ -1604,6 +1604,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                       <td>
                         {admin.email}
                         {admin.isSuperAdmin && <span style={{ marginLeft: '8px', padding: '2px 8px', background: '#0F0F0F', color: '#fff', borderRadius: '99px', fontSize: '10px', fontWeight: 800 }}>SUPER</span>}
+                        {admin.email === adminUser?.email && <span style={{ marginLeft: '8px', padding: '2px 8px', background: '#3B82F6', color: '#fff', borderRadius: '99px', fontSize: '10px', fontWeight: 800 }}>CURRENT SESSION</span>}
                       </td>
                       <td>{admin.name || '-'}</td>
                       <td>

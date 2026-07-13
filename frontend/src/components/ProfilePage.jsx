@@ -85,6 +85,7 @@ export default function ProfilePage({
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       setUserProfile(null);
+      if (setOrders) setOrders([]);
       setCartItems([]);
       localStorage.removeItem("monthrob_cart");
       localStorage.removeItem("monthrob_auth");
