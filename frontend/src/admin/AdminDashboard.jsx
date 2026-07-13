@@ -244,7 +244,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
         setUsers(userRes.data);
         if (adminRes) setAdmins(adminRes.data);
         setShowcaseHeadlines({ main: showRes.data.mainHeadline, sub: showRes.data.subHeadline });
-        setShowcaseSlides(showRes.data.slides && showRes.data.slides.length > 0 ? showRes.data.slides : [{ id: Date.now(), media: null, linkType: "None" }]);
+        setShowcaseSlides(showRes.data.slides && showRes.data.slides.length > 0 ? showRes.data.slides : [{ id: Date.now(), media: null, linkType: "None", platform: "All" }]);
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
       } finally {
@@ -286,7 +286,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
     socket.on('showcase_updated', () => {
       fetchShowcase().then(r => {
         setShowcaseHeadlines({ main: r.data.mainHeadline, sub: r.data.subHeadline });
-        setShowcaseSlides(r.data.slides && r.data.slides.length > 0 ? r.data.slides : [{ id: Date.now(), media: null, linkType: "None" }]);
+        setShowcaseSlides(r.data.slides && r.data.slides.length > 0 ? r.data.slides : [{ id: Date.now(), media: null, linkType: "None", platform: "All" }]);
       }).catch(() => {});
     });
     return () => {
@@ -313,7 +313,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
 
   const handleAddSlide = () => {
     if (showcaseSlides.length < 5) {
-      setShowcaseSlides([...showcaseSlides, { id: Date.now(), media: null, linkType: "None" }]);
+      setShowcaseSlides([...showcaseSlides, { id: Date.now(), media: null, linkType: "None", platform: "All" }]);
     }
   };
 
@@ -339,7 +339,8 @@ export default function AdminDashboard({ adminUser, onLogout }) {
           mediaUrl,
           linkType: slide.linkType,
           linkedProductId: slide.linkType === 'Product' ? slide.linkTarget : undefined,
-          linkedCollectionName: slide.linkType === 'Collection' ? slide.linkTarget : undefined
+          linkedCollectionName: slide.linkType === 'Collection' ? slide.linkTarget : undefined,
+          platform: slide.platform || 'All'
         });
       }
       await updateShowcase({
@@ -871,6 +872,7 @@ export default function AdminDashboard({ adminUser, onLogout }) {
           padding: 4px;
           border-radius: 8px;
           transition: background 0.2s;
+          z-index: 10;
         }
         
         .btn-delete:hover {
@@ -1377,9 +1379,14 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                 <div style={{ display: 'flex', gap: '48px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label className="form-label" style={{ fontSize: '12px' }}>Slide Media (High Res)</label>
-                    <label className="media-dropzone" htmlFor={`slide-media-${slide.id}`}>
+                    <label className="media-dropzone" htmlFor={`slide-media-${slide.id}`} style={{ position: 'relative' }}>
                       {slide.mediaFile || slide.mediaUrl ? (
-                        <img src={slide.mediaFile ? URL.createObjectURL(slide.mediaFile) : slide.mediaUrl} alt="slide" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
+                        <>
+                          <img src={slide.mediaFile ? URL.createObjectURL(slide.mediaFile) : slide.mediaUrl} alt="slide" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
+                          <div style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '12px', pointerEvents: 'none' }}>
+                            Change Image
+                          </div>
+                        </>
                       ) : (
                         <>
                           <UploadSimple size={24} weight="bold" />
@@ -1397,7 +1404,18 @@ export default function AdminDashboard({ adminUser, onLogout }) {
                   </div>
                   
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '300px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>Link Type</label>
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A' }}>Show on Device</label>
+                    <select 
+                      className="form-select" 
+                      value={slide.platform || 'All'}
+                      onChange={(e) => handleSlideChange(slide.id, 'platform', e.target.value)}
+                    >
+                      <option value="All">Both PC & Phone</option>
+                      <option value="Desktop">PC Only</option>
+                      <option value="Mobile">Phone Only</option>
+                    </select>
+
+                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#1A1A1A', marginTop: '8px' }}>Link Type</label>
                     <select 
                       className="form-select" 
                       value={slide.linkType}

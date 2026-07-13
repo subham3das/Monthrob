@@ -7,6 +7,19 @@ export default function Hero({ onShopClick }) {
   const [slides, setSlides] = useState([]);
   const [headlines, setHeadlines] = useState({ main: "", sub: "" });
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const displaySlides = slides.filter(s => {
+    if (!s.platform || s.platform === 'All') return true;
+    return isMobile ? s.platform === 'Mobile' : s.platform === 'Desktop';
+  });
 
   useEffect(() => {
     fetchShowcase().then(res => {
@@ -22,12 +35,18 @@ export default function Hero({ onShopClick }) {
   }, []);
 
   useEffect(() => {
-    if (slides.length <= 1) return;
+    if (displaySlides.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % slides.length);
+      setCurrentIdx((prev) => (prev + 1) % displaySlides.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [slides]);
+  }, [displaySlides.length]);
+
+  useEffect(() => {
+    if (currentIdx >= displaySlides.length && displaySlides.length > 0) {
+      setCurrentIdx(0);
+    }
+  }, [displaySlides.length, currentIdx]);
 
   if (loading) {
     return (
@@ -37,7 +56,7 @@ export default function Hero({ onShopClick }) {
     );
   }
 
-  if (slides.length === 0) {
+  if (displaySlides.length === 0) {
     return (
       <section style={{ width: "100%", height: "calc(100vh - 70px)", background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#FFFFFF", textAlign: "center", padding: "0 20px" }}>
         <h2 style={{ fontFamily: "var(--font-heading)", fontSize: "2.5rem", fontWeight: "900", marginBottom: "16px" }}>Our Admin Fell Asleep 😴</h2>
@@ -63,9 +82,9 @@ export default function Hero({ onShopClick }) {
         overflow: "hidden",
         cursor: "pointer"
       }}
-      onClick={() => handleHeroClick(slides[currentIdx])}
+      onClick={() => handleHeroClick(displaySlides[currentIdx])}
     >
-      {slides.map((slide, index) => (
+      {displaySlides.map((slide, index) => (
         <div
           key={slide._id || index}
           style={{

@@ -4,7 +4,8 @@ const slideSchema = new mongoose.Schema({
   mediaUrl: { type: String, required: true },
   linkType: { type: String, enum: ['None', 'Product', 'Collection'], default: 'None' },
   linkedProductId: { type: String },
-  linkedCollectionName: { type: String }
+  linkedCollectionName: { type: String },
+  platform: { type: String, enum: ['All', 'Desktop', 'Mobile'], default: 'All' }
 });
 
 const showcaseSchema = new mongoose.Schema({
